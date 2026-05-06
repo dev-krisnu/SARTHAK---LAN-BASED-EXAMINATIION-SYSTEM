@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sarthak&copy; - LAN Exam System</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#4f46e5;--primary-dark:#3730a3;--primary-light:#818cf8;
+  --success:#16a34a;--danger:#dc2626;--warn:#d97706;
+  --bg:#f1f5f9;--card:#ffffff;--border:#e2e8f0;
+  --text:#1e293b;--muted:#64748b;--radius:12px;
+  --shadow:0 4px 24px rgba(0,0,0,.08);
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+h1,h2,h3{font-weight:700;line-height:1.3}
+a{color:var(--primary);text-decoration:none}
+button{cursor:pointer;font-family:inherit}
+
+.page{display:none;min-height:100vh;animation:fadeIn .3s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.topbar{background:var(--primary);color:#fff;display:flex;align-items:center;
+        justify-content:space-between;padding:0 28px;height:60px;position:sticky;top:0;z-index:100;
+        box-shadow:0 2px 12px rgba(79,70,229,.3)}
+.topbar .brand{font-size:1.2rem;font-weight:700;display:flex;align-items:center;gap:10px}
+.topbar .brand span{font-size:1.5rem}
+.topbar-right{display:flex;align-items:center;gap:16px;font-size:.9rem}
+.topbar-right .user-badge{background:rgba(255,255,255,.2);border-radius:20px;padding:4px 14px}
+.btn-logout{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.4);
+            color:#fff;padding:5px 16px;border-radius:20px;font-size:.85rem;transition:.2s}
+.btn-logout:hover{background:rgba(255,255,255,.3)}
+
+#loginPage,#signupPage{display:flex;align-items:center;justify-content:center;
+           background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%)}
+.auth-box{background:#fff;border-radius:20px;padding:48px 40px;width:100%;max-width:420px;
+           box-shadow:0 24px 60px rgba(79,70,229,.25)}
+.auth-logo{text-align:center;margin-bottom:28px}
+.auth-logo .icon{font-size:3rem;display:block;margin-bottom:10px}
+.auth-logo h1{font-size:1.6rem;color:var(--primary)}
+.auth-logo p{color:var(--muted);font-size:.9rem;margin-top:4px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:.88rem;font-weight:600;margin-bottom:6px;color:var(--text)}
+.form-group input,.form-group select{width:100%;padding:11px 14px;border:2px solid var(--border);border-radius:9px;
+                  font-size:.95rem;transition:.2s;background:#f8fafc}
+.form-group input:focus,.form-group select:focus{outline:none;border-color:var(--primary);background:#fff}
+.btn-primary{width:100%;background:var(--primary);color:#fff;border:none;
+             padding:13px;border-radius:9px;font-size:1rem;font-weight:600;transition:.2s;margin-top:4px}
+.btn-primary:hover{background:var(--primary-dark);transform:translateY(-1px);box-shadow:0 4px 16px rgba(79,70,229,.4)}
+.btn-primary:active{transform:none}
+.auth-error{color:var(--danger);font-size:.88rem;margin-top:10px;text-align:center;
+             padding:8px;background:#fef2f2;border-radius:8px;display:none}
+.auth-success{color:var(--success);font-size:.88rem;margin-top:10px;text-align:center;
+             padding:8px;background:#f0fdf4;border-radius:8px;display:none}
+.auth-switch{text-align:center;margin-top:20px;font-size:.9rem;color:var(--muted)}
+.auth-switch a{color:var(--primary);font-weight:600;cursor:pointer}
+
+.layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 60px)}
+.sidebar{background:#fff;border-right:1px solid var(--border);padding:20px 0}
+.sidebar .nav-item{display:flex;align-items:center;gap:10px;padding:12px 24px;font-size:.93rem;
+                   color:var(--muted);cursor:pointer;transition:.15s;border-left:3px solid transparent}
+.sidebar .nav-item:hover{background:#f8fafc;color:var(--primary)}
+.sidebar .nav-item.active{background:#eef2ff;color:var(--primary);border-left-color:var(--primary);font-weight:600}
+.sidebar .nav-item .ico{font-size:1.1rem;width:20px;text-align:center}
+.sidebar-section{padding:8px 24px 4px;font-size:.75rem;font-weight:700;color:var(--muted);
+                 text-transform:uppercase;letter-spacing:.08em;margin-top:8px}
+.content{padding:32px;overflow-y:auto}
+
+.card{background:var(--card);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-bottom:24px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.card-header h2{font-size:1.2rem}
+.section-title{font-size:1.4rem;font-weight:700;margin-bottom:20px;color:var(--text)}
+
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-bottom:28px}
+.stat-card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);
+           border-left:4px solid var(--primary)}
+.stat-card .stat-val{font-size:2rem;font-weight:700;color:var(--primary)}
+.stat-card .stat-lbl{font-size:.85rem;color:var(--muted);margin-top:4px}
+
+.exams-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
+.exam-card{background:var(--card);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);
+           border:2px solid transparent;transition:.2s;position:relative;overflow:hidden}
+.exam-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--primary)}
+.exam-card:hover{border-color:var(--primary-light);transform:translateY(-2px)}
+.exam-card h3{font-size:1.1rem;margin-bottom:8px}
+.exam-card .subject-badge{background:#eef2ff;color:var(--primary);padding:3px 10px;border-radius:20px;
+                          font-size:.78rem;font-weight:600;display:inline-block;margin-bottom:12px}
+.exam-meta{display:flex;gap:16px;font-size:.85rem;color:var(--muted);margin-bottom:16px}
+.exam-meta span{display:flex;align-items:center;gap:4px}
+.btn-start{width:100%;background:var(--primary);color:#fff;border:none;padding:10px;
+           border-radius:8px;font-weight:600;transition:.2s}
+.btn-start:hover{background:var(--primary-dark)}
+.btn-start:disabled{background:#cbd5e1;cursor:default}
+
+#examPage .content{padding:24px}
+.exam-header-bar{background:var(--primary);color:#fff;border-radius:var(--radius);
+                 padding:16px 24px;display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.exam-header-bar h2{font-size:1.2rem}
+.timer-box{background:rgba(255,255,255,.2);border-radius:8px;padding:6px 20px;font-size:1.2rem;
+           font-weight:700;letter-spacing:.08em;min-width:90px;text-align:center}
+.timer-box.warn{background:#dc2626;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+.progress-bar-wrap{background:#e2e8f0;border-radius:99px;height:8px;margin-bottom:24px}
+.progress-bar{background:var(--primary);height:100%;border-radius:99px;transition:width .4s}
+.question-card{background:#fff;border-radius:var(--radius);padding:28px;box-shadow:var(--shadow);margin-bottom:16px}
+.question-num{font-size:.82rem;font-weight:700;color:var(--primary);text-transform:uppercase;
+              letter-spacing:.06em;margin-bottom:10px}
+.question-text{font-size:1.05rem;font-weight:600;margin-bottom:20px;line-height:1.6}
+.options{display:flex;flex-direction:column;gap:10px}
+.option{display:flex;align-items:center;gap:14px;padding:13px 18px;border:2px solid var(--border);
+        border-radius:10px;cursor:pointer;transition:.15s;font-size:.95rem}
+.option:hover{border-color:var(--primary-light);background:#f5f3ff}
+.option.selected{border-color:var(--primary);background:#eef2ff;font-weight:600}
+.option input[type=radio]{accent-color:var(--primary);width:18px;height:18px}
+.option-letter{width:30px;height:30px;border-radius:50%;background:var(--bg);display:flex;
+               align-items:center;justify-content:center;font-weight:700;font-size:.85rem;
+               color:var(--muted);flex-shrink:0}
+.option.selected .option-letter{background:var(--primary);color:#fff}
+.exam-nav{display:flex;justify-content:space-between;align-items:center;margin-top:24px;gap:12px;flex-wrap:wrap}
+.btn-secondary{background:#f1f5f9;color:var(--text);border:2px solid var(--border);
+               padding:10px 24px;border-radius:8px;font-weight:600;transition:.2s}
+.btn-secondary:hover{background:#e2e8f0}
+.btn-danger{background:var(--danger);color:#fff;border:none;padding:10px 24px;
+            border-radius:8px;font-weight:600;transition:.2s}
+.btn-danger:hover{background:#b91c1c}
+.q-dots{display:flex;flex-wrap:wrap;gap:6px}
+.q-dot{width:30px;height:30px;border-radius:6px;border:2px solid var(--border);display:flex;
+       align-items:center;justify-content:center;font-size:.78rem;font-weight:700;cursor:pointer;
+       color:var(--muted);transition:.15s}
+.q-dot.answered{background:var(--primary);color:#fff;border-color:var(--primary)}
+.q-dot.current{border-color:var(--primary);color:var(--primary)}
+
+#anticheatOverlay{display:none;position:fixed;inset:0;background:rgba(220,38,38,.95);
+  z-index:9000;align-items:center;justify-content:center;flex-direction:column;
+  color:#fff;text-align:center;padding:32px}
+#anticheatOverlay.show{display:flex}
+#anticheatOverlay h2{font-size:2rem;margin-bottom:16px}
+#anticheatOverlay p{font-size:1.1rem;opacity:.9;margin-bottom:24px;max-width:500px}
+.warning-count{background:rgba(255,255,255,.2);border-radius:12px;padding:12px 24px;
+               font-size:1.4rem;font-weight:700;margin-bottom:20px}
+.btn-resume{background:#fff;color:#dc2626;border:none;padding:12px 32px;border-radius:10px;
+            font-weight:700;font-size:1rem;cursor:pointer;transition:.2s}
+.btn-resume:hover{background:#fee2e2}
+
+.result-banner{text-align:center;padding:40px 24px;background:var(--card);border-radius:var(--radius);
+               box-shadow:var(--shadow);margin-bottom:24px}
+.result-circle{width:120px;height:120px;border-radius:50%;margin:0 auto 16px;display:flex;
+               align-items:center;justify-content:center;font-size:2rem;font-weight:700;color:#fff}
+.result-circle.pass{background:linear-gradient(135deg,#16a34a,#4ade80)}
+.result-circle.fail{background:linear-gradient(135deg,#dc2626,#f87171)}
+.result-circle.avg{background:linear-gradient(135deg,#d97706,#fbbf24)}
+
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+thead tr{background:#f8fafc}
+th{padding:12px 16px;text-align:left;font-weight:700;color:var(--muted);border-bottom:2px solid var(--border);
+   font-size:.82rem;text-transform:uppercase;letter-spacing:.04em}
+td{padding:12px 16px;border-bottom:1px solid var(--border);color:var(--text)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f8fafc}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.78rem;font-weight:700}
+.badge-green{background:#dcfce7;color:#15803d}
+.badge-red{background:#fee2e2;color:#b91c1c}
+.badge-blue{background:#dbeafe;color:#1d4ed8}
+.badge-gray{background:#f1f5f9;color:#64748b}
+
+.toggle-switch{position:relative;display:inline-block;width:44px;height:24px}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;cursor:pointer;inset:0;background:#cbd5e1;border-radius:12px;transition:.2s}
+.toggle-slider:before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;
+                      background:#fff;border-radius:50%;transition:.2s}
+input:checked+.toggle-slider{background:var(--primary)}
+input:checked+.toggle-slider:before{transform:translateX(20px)}
+
+#toast{position:fixed;bottom:28px;right:28px;background:#1e293b;color:#fff;padding:12px 20px;
+       border-radius:10px;font-size:.9rem;z-index:9999;opacity:0;transform:translateY(10px);
+       transition:.3s;pointer-events:none;max-width:320px}
+#toast.show{opacity:1;transform:none}
+
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;
+               align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:16px;padding:32px;width:90%;max-width:520px;
+       box-shadow:0 24px 60px rgba(0,0,0,.2);max-height:85vh;overflow-y:auto}
+.modal h2{margin-bottom:20px}
+.modal-actions{display:flex;gap:12px;justify-content:flex-end;margin-top:24px}
+
+@media(max-width:700px){
+  .layout{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .exams-grid{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .auth-box{padding:32px 24px;margin:16px}
+}
+</style>
+</head>
+<body>
+
+<div id="loginPage" class="page active" style="display:flex">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <span class="icon">🎓</span> 
+      <h1>Sarthak - LAN Exam System</h1>
+      <p>Sign in to continue</p>
+    </div>
+    <div class="form-group">
+      <label>Username / Email</label>
+      <input type="text" id="loginUser" placeholder="Enter username or email"/>
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="Enter password"/>
+    </div>
+    <button type="button" class="btn-primary" id="loginBtn">Sign In →</button>
+    <div class="auth-error" id="loginError"></div>
+    <div class="auth-switch">
+      New student? <a onclick="showPage('signupPage')">Create an account</a>
+      &nbsp;|&nbsp; <a href="team.html" target="_blank"> Dev Team</a>
+    </div>
+  </div>
+</div>
+
+<div id="signupPage" class="page" style="display:none">
+  <div class="auth-box" style="max-width:460px">
+    <div class="auth-logo">
+      <span class="icon">🎓</span>
+      <h1>Create Account</h1>
+      <p>Register as a student</p>
+    </div>
+    <div class="form-group">
+      <label>Full Name</label>
+      <input type="text" id="su-name" placeholder="e.g. Komal Shaw"/>
+    </div>
+    <div class="form-group">
+      <label>Email / Username</label>
+      <input type="text" id="su-username" placeholder="e.g. komalshaw5577@gmail.com"/>
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="su-pass" placeholder="Create a password"/>
+    </div>
+    <div class="form-group">
+      <label>Confirm Password</label>
+      <input type="password" id="su-pass2" placeholder="Repeat password"/>
+    </div>
+    <button type="button" class="btn-primary" id="signupBtn">Register →</button>
+    <div class="auth-error" id="signupError"></div>
+    <div class="auth-success" id="signupSuccess"></div>
+    <div class="auth-switch">
+      Already have an account? <a onclick="showPage('loginPage')">Sign in</a>
+    </div>
+  </div>
+</div>
+
+<div id="studentPage" class="page">
+  <div class="topbar">
+    <div class="brand"><span>🎓</span> LAN Exam System</div>
+    <div class="topbar-right">
+      <span class="user-badge" id="s-userName">Student</span>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </div>
+  <div class="layout">
+    <div class="sidebar">
+      <div class="nav-item active" onclick="sNav('exams',this)"><span class="ico">📝</span> Available Exams</div>
+      <div class="nav-item" onclick="sNav('myResults',this)"><span class="ico">📊</span> My Results</div>
+    </div>
+    <div class="content">
+      <!-- Available Exams -->
+      <div id="s-exams">
+        <div class="section-title">📝 Available Exams</div>
+        <div class="exams-grid" id="examCardsContainer">
+          <p style="color:var(--muted)">Loading exams…</p>
+        </div>
+      </div>
+      <!-- My Results -->
+      <div id="s-myResults" style="display:none">
+        <div class="section-title">📊 My Results</div>
+        <div class="card">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Exam</th><th>Subject</th><th>Score</th><th>Percentage</th><th>Date</th></tr></thead>
+              <tbody id="s-resultsTbody"><tr><td colspan="5" style="text-align:center;color:var(--muted)">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="examPage" class="page">
+  <div class="topbar">
+    <div class="brand"><span>📝</span> <span id="e-examTitle">Exam</span></div>
+    <div class="topbar-right">
+      <div style="font-size:.85rem;opacity:.85;margin-right:8px" id="e-warnCount"></div>
+      <div class="timer-box" id="e-timer">00:00</div>
+    </div>
+  </div>
+  <div class="content" style="max-width:820px;margin:0 auto">
+    <div class="exam-header-bar">
+      <div>
+        <h2 id="e-examSubject">Subject</h2>
+        <div style="font-size:.88rem;opacity:.8" id="e-examProgress">Question 1 of N</div>
+      </div>
+      <div style="text-align:right;font-size:.85rem;opacity:.85">
+        <div id="e-answered">0 answered</div>
+      </div>
+    </div>
+    <div class="progress-bar-wrap"><div class="progress-bar" id="e-progressBar" style="width:0%"></div></div>
+
+    <!-- Question -->
+    <div class="question-card">
+      <div class="question-num" id="e-qNum">Question 1</div>
+      <div class="question-text" id="e-qText">Loading…</div>
+      <div class="options" id="e-options"></div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="exam-nav">
+      <button class="btn-secondary" onclick="prevQ()">← Previous</button>
+      <div class="q-dots" id="e-qDots"></div>
+      <div style="display:flex;gap:10px">
+        <button class="btn-secondary" onclick="nextQ()">Next →</button>
+        <button class="btn-danger" onclick="confirmSubmit()">Submit Exam</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="anticheatOverlay">
+  <div style="font-size:4rem;margin-bottom:16px">⚠️</div>
+  <h2>Tab Switch Detected!</h2>
+  <p id="ac-msg">You left the exam window. This action has been recorded. Multiple violations will auto-submit your exam.</p>
+  <div class="warning-count" id="ac-warnCount">Warning 1 of 4</div>
+  <button class="btn-resume" onclick="resumeExam()">I Understand — Return to Exam</button>
+</div>
+
+<div id="resultPage" class="page">
+  <div class="topbar">
+    <div class="brand"><span>🎓</span>Sartak - LAN Exam System</div>
+    <div class="topbar-right">
+      <button class="btn-logout" onclick="goBack()">← Back to Dashboard</button>
+    </div>
+  </div>
+  <div class="content" style="max-width:700px;margin:0 auto;padding:32px">
+    <div class="result-banner">
+      <div class="result-circle" id="r-circle">0%</div>
+      <h2 id="r-title" style="font-size:1.6rem;margin-bottom:8px">Well Done!</h2>
+      <p id="r-subtitle" style="color:var(--muted)">Exam submitted successfully</p>
+      <div style="margin-top:20px;display:flex;justify-content:center;gap:32px;flex-wrap:wrap">
+        <div><div style="font-size:2rem;font-weight:700" id="r-score">0</div><div style="color:var(--muted);font-size:.85rem">Score</div></div>
+        <div><div style="font-size:2rem;font-weight:700" id="r-total">0</div><div style="color:var(--muted);font-size:.85rem">Total Marks</div></div>
+        <div><div style="font-size:2rem;font-weight:700" id="r-pct">0%</div><div style="color:var(--muted);font-size:.85rem">Percentage</div></div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="goBack()">← Back to Dashboard</button>
+  </div>
+</div>
+
+<div id="adminPage" class="page">
+  <div class="topbar">
+    <div class="brand"><span>⚙️</span> Sarthak — Admin</div>
+    <div class="topbar-right">
+      <span class="user-badge" id="a-userName">Admin</span>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </div>
+  <div class="layout">
+    <div class="sidebar">
+      <div class="sidebar-section">Overview</div>
+      <div class="nav-item active" onclick="aNav('dashboard',this)"><span class="ico">🏠</span> Dashboard</div>
+      <div class="sidebar-section">Manage</div>
+      <div class="nav-item" onclick="aNav('exams',this)"><span class="ico">📋</span> Exams</div>
+      <div class="nav-item" onclick="aNav('users',this)"><span class="ico">👥</span> Students</div>
+      <div class="nav-item" onclick="aNav('results',this)"><span class="ico">📊</span> Results</div>
+    </div>
+    <div class="content">
+
+      <!-- Dashboard -->
+      <div id="a-dashboard">
+        <div class="section-title">Sarthak Dashboard</div>
+        <div class="stats-grid" id="a-statsGrid">
+          <div class="stat-card"><div class="stat-val" id="st-exams">—</div><div class="stat-lbl">Total Exams</div></div>
+          <div class="stat-card" style="border-left-color:var(--success)"><div class="stat-val" id="st-active" style="color:var(--success)">—</div><div class="stat-lbl">Active Exams</div></div>
+          <div class="stat-card" style="border-left-color:#7c3aed"><div class="stat-val" id="st-students" style="color:#7c3aed">—</div><div class="stat-lbl">Students</div></div>
+          <div class="stat-card" style="border-left-color:var(--warn)"><div class="stat-val" id="st-results" style="color:var(--warn)">—</div><div class="stat-lbl">Submissions</div></div>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:16px">Quick Tips</h3>
+          <ul style="color:var(--muted);font-size:.93rem;line-height:2;padding-left:20px">
+            <li>Use <b>Exams</b> to toggle exams on/off and set how many random questions each student gets</li>
+            <li>View detailed results per exam in <b>Results</b></li>
+            <li>Students see a <b>random subset</b> of questions — each student gets a different set</li>
+            <li>Students connect via <b>http://&lt;your-IP&gt;:8080</b> on the LAN</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Exams -->
+      <div id="a-exams" style="display:none">
+        <div class="section-title">📋 Manage Exams</div>
+        <div class="card">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>#</th><th>Title</th><th>Subject</th><th>Duration</th><th>Total Qs</th><th>Show (Random)</th><th>Marks</th><th>Active</th><th>Results</th></tr></thead>
+              <tbody id="a-examsTbody"><tr><td colspan="9" style="text-align:center;color:var(--muted)">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Users -->
+      <div id="a-users" style="display:none">
+        <div class="section-title">👥 Students</div>
+        <div class="card">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>#</th><th>Full Name</th><th>Username</th><th>Role</th><th>Exams Taken</th></tr></thead>
+              <tbody id="a-usersTbody"><tr><td colspan="5" style="text-align:center;color:var(--muted)">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div id="a-results" style="display:none">
+        <div class="section-title">📊 Exam Results</div>
+        <div class="card" style="margin-bottom:20px">
+          <label style="font-weight:600;margin-right:12px">Select Exam:</label>
+          <select id="a-resultExamSelect" onchange="loadAdminResults()" style="padding:8px 14px;border-radius:8px;border:2px solid var(--border);font-size:.95rem">
+            <option value="">-- Choose Exam --</option>
+          </select>
+        </div>
+        <div class="card">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Student</th><th>Username</th><th>Score</th><th>Percentage</th><th>Grade</th><th>Submitted At</th></tr></thead>
+              <tbody id="a-resultsTbody"><tr><td colspan="6" style="text-align:center;color:var(--muted)">Select an exam above</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="submitModal">
+  <div class="modal">
+    <h2>⚠️Pakka... Submit Exam?</h2>
+    <p id="submitModalMsg" style="color:var(--muted);margin-bottom:8px">Are you sure you want to submit?</p>
+    <p style="color:var(--danger);font-size:.88rem">You cannot change answers after submission.</p>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn-danger" onclick="submitExam()">Yes, Submit</button>
+    </div>
+  </div>
+</div>
+
+<!-- Set Questions Modal -->
+<div class="modal-overlay" id="setQModal">
+  <div class="modal">
+    <h2>Set Random Question Count</h2>
+    <p style="color:var(--muted);margin-bottom:16px">How many questions should each student see?<br>They will be randomly selected from all available questions.</p>
+    <div class="form-group">
+      <label>Number of Questions to Show</label>
+      <input type="number" id="sqCount" min="1" placeholder="e.g. 20" style="padding:10px 14px;border:2px solid var(--border);border-radius:8px;font-size:1rem;width:100%"/>
+      <p style="font-size:.82rem;color:var(--muted);margin-top:6px" id="sqHint"></p>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeSetQModal()">Cancel</button>
+      <button class="btn-primary" style="width:auto;padding:10px 24px" onclick="saveQCount()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+
+const API = '';
+let currentUser  = null;
+let examData     = null;
+let questions    = [];
+let answers      = {};
+let currentQIdx  = 0;
+let timerInterval= null;
+let timeLeft     = 0;
+
+// Anti-cheat state
+let tabWarnings  = 0;
+const MAX_WARNINGS = 3;
+let examActive   = false;
+let setQExamId   = null;
+let setQMaxCount = 0;
+
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>{
+    p.classList.remove('active');
+    p.style.display = 'none';
+  });
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.classList.add('active');
+  // Login and signup get flex centering
+  if(id==='loginPage'||id==='signupPage'){
+    el.style.display='flex';
+    el.style.alignItems='center';
+    el.style.justifyContent='center';
+    el.style.minHeight='100vh';
+  } else {
+    el.style.display='block';
+  }
+}
+
+document.getElementById('loginBtn').addEventListener('click', doLogin);
+document.getElementById('loginPass').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+document.getElementById('loginUser').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+
+async function doLogin(){
+  const username = document.getElementById('loginUser').value.trim();
+  const password = document.getElementById('loginPass').value;
+  const errEl    = document.getElementById('loginError');
+  errEl.style.display='none';
+  if(!username||!password){ showErr(errEl,'Please enter username and password.'); return; }
+  try{
+    const res  = await fetch(API+'/api/login',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({username,password})
+    });
+    const data = await res.json();
+    if(data.success){
+      currentUser = {userId:data.userId, role:data.role, fullName:data.fullName, username:data.username};
+      if(data.role==='admin') loadAdminDashboard();
+      else loadStudentDashboard();
+    } else {
+      showErr(errEl, data.message || 'Invalid credentials');
+    }
+  }catch(e){
+    showErr(errEl,'Cannot connect to server. Is the Java server running?');
+  }
+}
+
+document.getElementById('signupBtn').addEventListener('click', doSignup);
+
+async function doSignup(){
+  const name    = document.getElementById('su-name').value.trim();
+  const username= document.getElementById('su-username').value.trim();
+  const pass    = document.getElementById('su-pass').value;
+  const pass2   = document.getElementById('su-pass2').value;
+  const errEl   = document.getElementById('signupError');
+  const okEl    = document.getElementById('signupSuccess');
+  errEl.style.display='none'; okEl.style.display='none';
+
+  if(!name||!username||!pass||!pass2){ showErr(errEl,'All fields are required.'); return; }
+  if(pass !== pass2){ showErr(errEl,'Passwords do not match.'); return; }
+  if(pass.length < 5){ showErr(errEl,'Password must be at least 5 characters.'); return; }
+
+  try{
+    const res  = await fetch(API+'/api/signup',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({fullName:name, username, password:pass})
+    });
+    const data = await res.json();
+    if(data.success){
+      okEl.textContent = '✅ Account created! You can now sign in.';
+      okEl.style.display='block';
+      // Clear fields
+      ['su-name','su-username','su-pass','su-pass2'].forEach(id=>document.getElementById(id).value='');
+      setTimeout(()=>showPage('loginPage'), 2000);
+    } else {
+      showErr(errEl, data.message || 'Registration failed.');
+    }
+  }catch(e){
+    showErr(errEl,'Cannot connect to server.');
+  }
+}
+
+function showErr(el,msg){ el.textContent=msg; el.style.display='block'; }
+
+function logout(){
+  examActive=false; stopAnticheat();
+  currentUser=null; examData=null; questions=[]; answers={};
+  clearInterval(timerInterval);
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+  showPage('loginPage');
+}
+
+async function loadStudentDashboard(){
+  document.getElementById('s-userName').textContent = currentUser.fullName;
+  showPage('studentPage');
+  sNav('exams', document.querySelector('#studentPage .nav-item'));
+  await loadExams();
+}
+
+function sNav(section, el){
+  document.querySelectorAll('#studentPage .nav-item').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('s-exams').style.display    = section==='exams'     ? 'block':'none';
+  document.getElementById('s-myResults').style.display= section==='myResults' ? 'block':'none';
+  if(section==='myResults') loadMyResults();
+}
+
+async function loadExams(){
+  const container = document.getElementById('examCardsContainer');
+  container.innerHTML = '<p style="color:var(--muted)">Loading exams…</p>';
+  try{
+    const res  = await fetch(API+'/api/exams');
+    const exams= await res.json();
+    if(!exams.length){ container.innerHTML='<p style="color:var(--muted)">No active exams at the moment.</p>'; return; }
+    container.innerHTML = exams.map(e=>{
+      const done = localStorage.getItem('done_'+currentUser.userId+'_'+e.id);
+      const qInfo = e.questionsShown > 0 ? `🎲 ${e.questionsShown} random questions` : `📋 ${e.totalMarks} marks`;
+      return `
+      <div class="exam-card">
+        <h3>${esc(e.title)}</h3>
+        <span class="subject-badge">${esc(e.subject)}</span>
+        <div class="exam-meta">
+          <span>⏱ ${e.durationMinutes} min</span>
+          <span>${qInfo}</span>
+        </div>
+        ${done
+          ? '<button class="btn-start" disabled>✅ Submitted</button>'
+          : `<button class="btn-start" onclick="startExam(${e.id},'${esc(e.title)}','${esc(e.subject)}',${e.durationMinutes},${e.totalMarks},${e.questionsShown})">Start Exam →</button>`
+        }
+      </div>`;
+    }).join('');
+  }catch(e){ container.innerHTML='<p style="color:var(--danger)">Error loading exams.</p>'; }
+}
+
+async function loadMyResults(){
+  const tbody = document.getElementById('s-resultsTbody');
+  tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted)">Loading…</td></tr>';
+  try{
+    const res = await fetch(API+'/api/results?studentId='+currentUser.userId);
+    const rs  = await res.json();
+    if(!rs.length){ tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted)">No results yet.</td></tr>'; return; }
+    tbody.innerHTML = rs.map(r=>`
+      <tr>
+        <td>${esc(r.examTitle)}</td>
+        <td>${esc(r.subject)}</td>
+        <td>${r.score} / ${r.totalMarks}</td>
+        <td>${gradeBadge(r.percentage)}</td>
+        <td style="color:var(--muted);font-size:.85rem">${r.submittedAt||''}</td>
+      </tr>`).join('');
+  }catch(e){ tbody.innerHTML='<tr><td colspan="5" style="color:var(--danger)">Error loading results.</td></tr>'; }
+}
+
+async function startExam(id, title, subject, duration, totalMarks, questionsShown){
+  examData   = {id, title, subject, durationMinutes:duration, totalMarks, questionsShown};
+  answers    = {};
+  currentQIdx= 0;
+  tabWarnings= 0;
+  showPage('examPage');
+  document.getElementById('e-examTitle').textContent   = title;
+  document.getElementById('e-examSubject').textContent = subject;
+  document.getElementById('e-warnCount').textContent   = '';
+
+  try{
+    // Pass questionsShown so server knows how many to return
+    const url = API+'/api/questions?examId='+id+(questionsShown>0?'&limit='+questionsShown:'');
+    const res = await fetch(url);
+    questions = await res.json();
+    if(!questions.length){ toast('No questions found for this exam.','warn'); goBack(); return; }
+    buildQDots();
+    renderQ(0);
+    startTimer(duration * 60);
+    // Start anti-cheat AFTER questions load
+    examActive = true;
+    startAnticheat();
+  }catch(e){ toast('Error loading questions','error'); goBack(); }
+}
+
+function renderQ(idx){
+  currentQIdx = idx;
+  const q    = questions[idx];
+  const total= questions.length;
+  document.getElementById('e-qNum').textContent     = `Question ${idx+1} of ${total}`;
+  document.getElementById('e-qText').textContent    = q.questionText;
+  document.getElementById('e-examProgress').textContent = `Question ${idx+1} of ${total}`;
+  document.getElementById('e-progressBar').style.width  = ((idx+1)/total*100)+'%';
+
+  const chosen = answers[q.id];
+  // Options are already shuffled by server (ORDER BY RAND()), render as-is
+  const opts   = q.displayOrder || ['A','B','C','D'];
+  const labels = [q.optionA, q.optionB, q.optionC, q.optionD];
+
+  document.getElementById('e-options').innerHTML = opts.map((o,i)=>`
+    <label class="option ${chosen===o?'selected':''}" onclick="pickAnswer(${q.id},'${o}',this)">
+      <input type="radio" name="q${q.id}" value="${o}" ${chosen===o?'checked':''} style="display:none">
+      <span class="option-letter">${o}</span>
+      <span>${esc(labels[i])}</span>
+    </label>`).join('');
+
+  updateQDots();
+  const answered = Object.keys(answers).length;
+  document.getElementById('e-answered').textContent = `${answered} of ${total} answered`;
+}
+
+function pickAnswer(qId, opt, labelEl){
+  answers[qId] = opt;
+  document.querySelectorAll(`#e-options .option`).forEach(l=>l.classList.remove('selected'));
+  labelEl.classList.add('selected');
+  updateQDots();
+  const answered = Object.keys(answers).length;
+  document.getElementById('e-answered').textContent = `${answered} of ${questions.length} answered`;
+}
+
+function prevQ(){ if(currentQIdx>0) renderQ(currentQIdx-1); }
+function nextQ(){ if(currentQIdx<questions.length-1) renderQ(currentQIdx+1); }
+
+function buildQDots(){
+  document.getElementById('e-qDots').innerHTML = questions.map((_,i)=>
+    `<div class="q-dot" id="dot-${i}" onclick="renderQ(${i})">${i+1}</div>`).join('');
+}
+
+function updateQDots(){
+  questions.forEach((q,i)=>{
+    const d=document.getElementById('dot-'+i);
+    if(!d) return;
+    d.className='q-dot'+(answers[q.id]?' answered':'')+(i===currentQIdx?' current':'');
+  });
+}
+
+function startTimer(seconds){
+  clearInterval(timerInterval);
+  timeLeft = seconds;
+  function tick(){
+    const m=Math.floor(timeLeft/60).toString().padStart(2,'0');
+    const s=(timeLeft%60).toString().padStart(2,'0');
+    const el=document.getElementById('e-timer');
+    el.textContent=`${m}:${s}`;
+    el.classList.toggle('warn', timeLeft<=60);
+    if(timeLeft<=0){ clearInterval(timerInterval); toast('Time up! Submitting…','warn'); submitExam(); }
+    timeLeft--;
+  }
+  tick();
+  timerInterval = setInterval(tick,1000);
+}
+
+function confirmSubmit(){
+  const unanswered = questions.length - Object.keys(answers).length;
+  document.getElementById('submitModalMsg').textContent =
+    unanswered>0
+    ? `You have ${unanswered} unanswered question(s). Submit anyway?`
+    : 'All questions answered. Ready to submit?';
+  document.getElementById('submitModal').classList.add('open');
+}
+function closeModal(){ document.getElementById('submitModal').classList.remove('open'); }
+
+async function submitExam(){
+  closeModal();
+  examActive = false;
+  stopAnticheat();
+  clearInterval(timerInterval);
+  try{
+    const res  = await fetch(API+'/api/submit',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({studentId:currentUser.userId, examId:examData.id, answers})
+    });
+    const data = await res.json();
+    if(data.success){
+      localStorage.setItem('done_'+currentUser.userId+'_'+examData.id,'1');
+      showResult(data);
+    } else {
+      toast(data.message||'Submission failed','error');
+      goBack();
+    }
+  }catch(e){ toast('Network error during submission','error'); }
+}
+
+function showResult(data){
+  const pct = data.percentage;
+  const circle = document.getElementById('r-circle');
+  circle.textContent = pct+'%';
+  circle.className = 'result-circle '+(pct>=75?'pass':pct>=40?'avg':'fail');
+  document.getElementById('r-score').textContent = data.score;
+  document.getElementById('r-total').textContent = data.totalMarks;
+  document.getElementById('r-pct').textContent   = pct+'%';
+  document.getElementById('r-title').textContent  = pct>=75?'🎉 Excellent!':pct>=40?'👍 Good Effort!':'📚 Keep Practicing!';
+  document.getElementById('r-subtitle').textContent = `You scored ${data.score} out of ${data.totalMarks} in ${examData.title}`;
+  showPage('resultPage');
+}
+
+function goBack(){ examActive=false; stopAnticheat(); loadStudentDashboard(); }
+
+// ══════════════════════════════════════════════
+//  ANTI-CHEAT SYSTEM
+// ══════════════════════════════════════════════
+function startAnticheat(){
+  document.addEventListener('visibilitychange', onVisibilityChange);
+  window.addEventListener('blur', onWindowBlur);
+}
+
+function stopAnticheat(){
+  document.removeEventListener('visibilitychange', onVisibilityChange);
+  window.removeEventListener('blur', onWindowBlur);
+  document.getElementById('anticheatOverlay').classList.remove('show');
+}
+
+function onVisibilityChange(){
+  if(!examActive) return;
+  if(document.hidden) triggerWarning('tab switch');
+}
+
+function onWindowBlur(){
+  if(!examActive) return;
+  if(document.hidden) return; // already handled by visibility change
+  triggerWarning('window focus lost');
+}
+
+function triggerWarning(reason){
+  tabWarnings++;
+  const remaining = MAX_WARNINGS - tabWarnings;
+  const overlay   = document.getElementById('anticheatOverlay');
+  document.getElementById('ac-warnCount').textContent = `Warning ${tabWarnings} of ${MAX_WARNINGS}`;
+  const warnEl = document.getElementById('e-warnCount');
+  if(warnEl) warnEl.textContent = `⚠️ ${tabWarnings} warning(s)`;
+
+  if(tabWarnings >= MAX_WARNINGS){
+    document.getElementById('ac-msg').textContent =
+      `Maximum violations reached. Your exam will be automatically submitted now.`;
+    overlay.classList.add('show');
+    setTimeout(()=>{
+      overlay.classList.remove('show');
+      toast('Exam auto-submitted due to repeated violations.','error');
+      submitExam();
+    }, 3000);
+  } else {
+    document.getElementById('ac-msg').textContent =
+      `You left the exam window. This has been recorded. You have ${remaining} warning(s) left before auto-submission.`;
+    overlay.classList.add('show');
+  }
+}
+
+function resumeExam(){
+  document.getElementById('anticheatOverlay').classList.remove('show');
+}
+
+// ══════════════════════════════════════════════
+//  ADMIN DASHBOARD
+// ══════════════════════════════════════════════
+async function loadAdminDashboard(){
+  document.getElementById('a-userName').textContent = currentUser.fullName;
+  showPage('adminPage');
+  aNav('dashboard', document.querySelector('#adminPage .nav-item'));
+  try{
+    const [examsRes, usersRes] = await Promise.all([
+      fetch(API+'/api/admin/exams'),
+      fetch(API+'/api/admin/users')
+    ]);
+    const exams = await examsRes.json();
+    const users = await usersRes.json();
+    document.getElementById('st-exams').textContent    = exams.length;
+    document.getElementById('st-active').textContent   = exams.filter(e=>e.isActive).length;
+    const students = users.filter(u=>u.role==='student');
+    document.getElementById('st-students').textContent = students.length;
+    const total = students.reduce((s,u)=>s+u.examsTaken,0);
+    document.getElementById('st-results').textContent  = total;
+  }catch(e){}
+}
+
+function aNav(section, el){
+  document.querySelectorAll('#adminPage .nav-item').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+  ['dashboard','exams','users','results'].forEach(s=>{
+    document.getElementById('a-'+s).style.display = s===section?'block':'none';
+  });
+  if(section==='exams')   loadAdminExams();
+  if(section==='users')   loadAdminUsers();
+  if(section==='results') loadAdminExamSelect();
+}
+
+async function loadAdminExams(){
+  const tbody = document.getElementById('a-examsTbody');
+  tbody.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--muted)">Loading…</td></tr>';
+  try{
+    const res   = await fetch(API+'/api/admin/exams');
+    const exams = await res.json();
+    tbody.innerHTML = exams.map(e=>`
+      <tr>
+        <td>${e.id}</td>
+        <td><b>${esc(e.title)}</b></td>
+        <td>${esc(e.subject)}</td>
+        <td>${e.durationMinutes} min</td>
+        <td>${e.questionCount}</td>
+        <td>
+          <span style="font-weight:700;color:var(--primary)">${e.questionsShown > 0 ? e.questionsShown : 'All'}</span>
+          <button class="btn-secondary" style="padding:3px 10px;font-size:.78rem;margin-left:8px"
+            onclick="openSetQModal(${e.id}, ${e.questionCount}, ${e.questionsShown})">✏️ Set</button>
+        </td>
+        <td>${e.totalMarks}</td>
+        <td>
+          <label class="toggle-switch">
+            <input type="checkbox" ${e.isActive?'checked':''} onchange="toggleExam(${e.id},this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+        </td>
+        <td><button class="btn-secondary" style="padding:5px 12px;font-size:.82rem"
+              onclick="quickViewResults(${e.id},'${esc(e.title)}')">View Results</button></td>
+      </tr>`).join('');
+  }catch(e){ tbody.innerHTML='<tr><td colspan="9" style="color:var(--danger)">Error</td></tr>'; }
+}
+
+function openSetQModal(examId, maxCount, current){
+  setQExamId   = examId;
+  setQMaxCount = maxCount;
+  document.getElementById('sqCount').value   = current > 0 ? current : maxCount;
+  document.getElementById('sqHint').textContent = `Total questions available: ${maxCount}. Enter 0 to show all.`;
+  document.getElementById('setQModal').classList.add('open');
+}
+
+function closeSetQModal(){ document.getElementById('setQModal').classList.remove('open'); }
+
+async function saveQCount(){
+  const count = parseInt(document.getElementById('sqCount').value) || 0;
+  if(count < 0){ toast('Cannot be negative','error'); return; }
+  if(count > setQMaxCount){ toast('More than available questions! Max: '+setQMaxCount,'error'); return; }
+  try{
+    const res = await fetch(API+'/api/admin/exams',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({examId:setQExamId, action:'setQuestionsShown', questionsShown:count})
+    });
+    const data = await res.json();
+    if(data.success){
+      toast('Question count updated!','success');
+      closeSetQModal();
+      loadAdminExams();
+    } else {
+      toast(data.message||'Error','error');
+    }
+  }catch(e){ toast('Error saving','error'); }
+}
+
+async function toggleExam(examId, active){
+  try{
+    await fetch(API+'/api/admin/exams',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({examId, action:'toggleActive', active: active?1:0})
+    });
+    toast(active?'Exam activated':'Exam deactivated', 'success');
+  }catch(e){ toast('Error toggling exam','error'); }
+}
+
+async function quickViewResults(examId, title){
+  aNav('results', document.querySelectorAll('#adminPage .nav-item')[3]);
+  document.getElementById('a-resultExamSelect').value = examId;
+  loadAdminResults();
+}
+
+async function loadAdminUsers(){
+  const tbody = document.getElementById('a-usersTbody');
+  tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted)">Loading…</td></tr>';
+  try{
+    const res   = await fetch(API+'/api/admin/users');
+    const users = await res.json();
+    tbody.innerHTML = users.map((u,i)=>`
+      <tr>
+        <td>${i+1}</td>
+        <td>${esc(u.fullName)}</td>
+        <td><code>${esc(u.username)}</code></td>
+        <td><span class="badge ${u.role==='admin'?'badge-blue':'badge-gray'}">${u.role}</span></td>
+        <td>${u.examsTaken}</td>
+      </tr>`).join('');
+  }catch(e){ tbody.innerHTML='<tr><td colspan="5" style="color:var(--danger)">Error</td></tr>'; }
+}
+
+async function loadAdminExamSelect(){
+  const sel = document.getElementById('a-resultExamSelect');
+  sel.innerHTML='<option value="">-- Choose Exam --</option>';
+  try{
+    const res   = await fetch(API+'/api/admin/exams');
+    const exams = await res.json();
+    exams.forEach(e=>{
+      const o = document.createElement('option');
+      o.value = e.id;
+      o.textContent = e.title + ' ('+e.subject+')';
+      sel.appendChild(o);
+    });
+  }catch(e){}
+}
+
+async function loadAdminResults(){
+  const examId = document.getElementById('a-resultExamSelect').value;
+  const tbody  = document.getElementById('a-resultsTbody');
+  if(!examId){ tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted)">Select an exam above</td></tr>'; return; }
+  tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted)">Loading…</td></tr>';
+  try{
+    const res = await fetch(API+'/api/results?examId='+examId);
+    const rs  = await res.json();
+    if(!rs.length){ tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted)">No submissions yet.</td></tr>'; return; }
+    tbody.innerHTML = rs.map((r,i)=>`
+      <tr>
+        <td><b>${esc(r.studentName)}</b></td>
+        <td><code>${esc(r.username)}</code></td>
+        <td>${r.score} / ${r.totalMarks}</td>
+        <td>${gradeBadge(r.percentage)}</td>
+        <td>${gradeLetter(r.percentage)}</td>
+        <td style="color:var(--muted);font-size:.85rem">${r.submittedAt||''}</td>
+      </tr>`).join('');
+  }catch(e){ tbody.innerHTML='<tr><td colspan="6" style="color:var(--danger)">Error loading results.</td></tr>'; }
+}
+
+// ══════════════════════════════════════════════
+//  UTILITY
+// ══════════════════════════════════════════════
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function gradeBadge(pct){
+  if(pct>=75) return `<span class="badge badge-green">${pct}%</span>`;
+  if(pct>=40) return `<span class="badge" style="background:#fef3c7;color:#92400e">${pct}%</span>`;
+  return `<span class="badge badge-red">${pct}%</span>`;
+}
+
+function gradeLetter(pct){
+  if(pct>=90) return '<b style="color:var(--success)">A+</b>';
+  if(pct>=80) return '<b style="color:var(--success)">A</b>';
+  if(pct>=70) return '<b style="color:#16a34a">B</b>';
+  if(pct>=60) return '<b style="color:var(--warn)">C</b>';
+  if(pct>=40) return '<b style="color:var(--warn)">D</b>';
+  return '<b style="color:var(--danger)">F</b>';
+}
+
+let toastT;
+function toast(msg, type='info'){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.background = type==='success'?'#15803d':type==='error'?'#dc2626':type==='warn'?'#b45309':'#1e293b';
+  el.classList.add('show');
+  clearTimeout(toastT);
+  toastT = setTimeout(()=>el.classList.remove('show'), 3200);
+}
+</script>
+</body>
+</html>
