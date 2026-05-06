@@ -53,7 +53,7 @@ source /path/to/LanExamSystem/database/setup.sql
 
 Open `src/DBConnection.java` and update line:
 ```java
-private static final String DB_PASS = "komalshaw2007";   // ← your MySQL root password
+private static final String DB_PASS = "**********";   // ← your MySQL root password
 ```
 Change it to match your MySQL password.
 
@@ -62,20 +62,14 @@ Change it to match your MySQL password.
 1. Go to: https://dev.mysql.com/downloads/connector/j/
 2. Select **Platform Independent**, download the ZIP.
 3. Extract it and copy the `.jar` file (e.g. `mysql-connector-j-9.1.0.jar`) into the **root** `LanExamSystem/` folder.
-4. If your JAR has a different version number, edit `run_windows.bat` or `run_linux.sh` and change the `JAR=` line.
+4. If your JAR has a different version number, edit `run_server.bat` and change the `JAR=` line.
 
 ### Step 4 — Run the Server
 
-**Windows:**
 ```
-Double-click run_windows.bat
+Double-click run_server.bat
 ```
 
-**Linux / Mac:**
-```bash
-chmod +x run_linux.sh
-./run_linux.sh
-```
 
 You should see:
 ```
