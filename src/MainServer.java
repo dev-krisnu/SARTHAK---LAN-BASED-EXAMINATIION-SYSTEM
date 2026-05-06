@@ -12,11 +12,7 @@ public class MainServer {
     static final int PORT = 8080;
 
     public static void main(String[] args) throws Exception {
-
-        System.out.println("==============================================");
         System.out.println("  LAN EXAM SYSTEM  |  Starting on port " + PORT);
-        System.out.println("==============================================");
-
         if (DBConnection.getConnection() == null) {
             System.err.println("[ERROR] Cannot connect to database. Check DBConnection.java and your MySQL settings.");
             System.exit(1);
