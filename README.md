@@ -20,7 +20,7 @@ LanExamSystem/
     └── team.html     
 ├── database/
 │   └── setup.sql             ← Run this in MySQL first!
-├── run_windows.bat           ← Build & run on Windows
+├── run_server.bat           ← Build & run on Windows
 └── README.md
 ```
 
